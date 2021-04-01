@@ -3,88 +3,86 @@
   <style>
   body {
     background-color: black;
-    margin: 3em;
     }
   </style>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.7/pixi.min.js" integrity="sha512-k8E2ILMRTO1YBnA2dvTDfsZs7f07gazZDQYbsv2NCxnM9hYFwCKu+rWISm8/fFB1I/gi0tgnURcXJVR7GlE0BA==" crossorigin="anonymous"></script>
-  <!--script src="lib/animatorClass.js"></script>
-  <script src="lib/treeClass.js"></script>
-  <script src="lib/zoomClass.js"></script>
-  <script src="lib/midi.js"></script-->
+  <script src="https://unpkg.com/zdog@1/dist/zdog.dist.min.js"></script>
+  <!--script src="lib/world.js"></script-->
 </head>
 
 <body>
-  <div align="center">
+  <canvas class="zdog-canvas" width="1300" height="800"></canvas>
 
-  </div>
+<script type="text/javascript">
+// Made with Zdog
 
-  <script type="text/javascript">
-  u = 48;
-  w = 40;
-  h = 30;
-  anim = true;
-  animList = new Array();
+let isSpinning = true;
 
-  let Application = PIXI.Application,
-      Container = PIXI.Container,
-      loader = PIXI.Loader.shared,
-      resources = PIXI.Loader.shared.resources,
-      Graphics = PIXI.Graphics,
-      TextureCache = PIXI.utils.TextureCache,
-      Sprite = PIXI.Sprite;
+let illo = new Zdog.Illustration({
+  element: '.zdog-canvas',
+  dragRotate: true,
+  // stop spinning when drag starts
+  onDragStart: function() {
+    isSpinning = false;
+  },
+});
 
-  var renderer = PIXI.autoDetectRenderer(800, 600,{backgroundColor : 0x1099bb});
-  //document.body.appendChild(renderer.view);
-
-      // create the root of the scene graph
-
-  //Create a Pixi Application
-  let app = new Application({
-      width: u*w,
-      height: u*h,
-      antialiasing: true,
-      transparent: false,
-      resolution: 1
-    }
-  );
-
-  document.body.appendChild(app.view);
-
-    var farTexture = PIXI.Texture.fromImage("resources/bg-sky3.png");
-    far = new PIXI.extras.TilingSprite(farTexture, u*w, u*h);
-    //far.scale.x = 3;
-    //far.scale.y = 3;
-    far.position.x = 0;
-    far.position.y = 0;
-    app.stage.addChild(far);
+/*new Zdog.Box({
+  addTo: illo,
+  width: 60,
+  height: 60,
+  depth: 100,
+  stroke: false,
+  translate: { x: 100 },
+  color: '#C25', // default face color
+  leftFace: '#EA0',
+  rightFace: '#E62',
+  topFace: '#ED0',
+  bottomFace: '#636',
+});*/
 
 
-  function animate() {
-    if(anim) requestAnimationFrame(animate);
 
-    parallaxScrolling();
-
-    for(i = 0; i < animList.length; i++) {
-      a = animList[i];
-
-      if(a && a.active)
-        a.frame();
-
-      if(a && !a.active) {
-        let oList = a.getStageObjects();
-        for(j = 0; j < oList.length; j++) {
-          app.stage.removeChild(oList[j]);
+function test(mx, my, mz) {
+  for(let z = 0; z < mz; z++) {
+    for(let x = 0; x < mx; x++) {
+      for(let y = 0; y < my; y++) {
+        if(Math.floor(Math.random() * 10) > 3) {
+          new Zdog.Box({
+            addTo: illo,
+            width: 90,
+            height: 60,
+            depth: 60,
+            stroke: false,
+            translate: { x: (x-5)*100, y: (y-10)*100, z:z*(-60) },
+            color: '#C25', // default face color
+            leftFace: '#EA0',
+            rightFace: '#E62',
+            topFace: '#ED0',
+            bottomFace: '#636',
+          });
         }
-        animList[i] = null;
       }
     }
-
-    animList = animList.filter(function (el) {return el != null;});
   }
 
+}
 
+// Set some values for now
+illo.rotate.x = 1.1;
+illo.rotate.z = 88;
+illo.zoom = 0.8;
 
-  </script>
+function animate() {
+  illo.rotate.z += isSpinning ? 0.002 : 0;
+  illo.updateRenderGraph();
+  requestAnimationFrame( animate );
+}
+
+animate();
+
+test(10, 20, 2);
+
+</script>
 </body>
 </html>
