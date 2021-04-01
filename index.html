@@ -1,0 +1,341 @@
+<html>
+<head>
+  <style>
+  body {
+    background-color: black;
+    margin: 3em;
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.7/pixi.min.js" integrity="sha512-k8E2ILMRTO1YBnA2dvTDfsZs7f07gazZDQYbsv2NCxnM9hYFwCKu+rWISm8/fFB1I/gi0tgnURcXJVR7GlE0BA==" crossorigin="anonymous"></script>
+  <!--script src="lib/animatorClass.js"></script>
+  <script src="lib/treeClass.js"></script>
+  <script src="lib/zoomClass.js"></script>
+  <script src="lib/midi.js"></script-->
+</head>
+
+<body>
+  <div align="center">
+
+  </div>
+
+  <script type="text/javascript">
+  u = 48;
+  w = 40;
+  h = 30;
+  anim = true;
+  animList = new Array();
+
+  let Application = PIXI.Application,
+      Container = PIXI.Container,
+      loader = PIXI.Loader.shared,
+      resources = PIXI.Loader.shared.resources,
+      Graphics = PIXI.Graphics,
+      TextureCache = PIXI.utils.TextureCache,
+      Sprite = PIXI.Sprite;
+
+  var renderer = PIXI.autoDetectRenderer(800, 600,{backgroundColor : 0x1099bb});
+  //document.body.appendChild(renderer.view);
+
+      // create the root of the scene graph
+
+  //Create a Pixi Application
+  let app = new Application({
+      width: u*w,
+      height: u*h,
+      antialiasing: true,
+      transparent: false,
+      resolution: 1
+    }
+  );
+
+  document.body.appendChild(app.view);
+
+    var farTexture = PIXI.Texture.fromImage("resources/bg-sky3.png");
+    far = new PIXI.extras.TilingSprite(farTexture, u*w, u*h);
+    //far.scale.x = 3;
+    //far.scale.y = 3;
+    far.position.x = 0;
+    far.position.y = 0;
+    app.stage.addChild(far);
+
+    /*var layTexture = PIXI.Texture.fromImage("resources/sky-blend.png");
+    lay = new PIXI.extras.TilingSprite(layTexture, u*w, u*h);
+    lay.alpha = 0.2;
+    lay.position.x = 0;
+    lay.position.y = 0;
+    app.stage.addChild(lay);*/
+
+    var starTexture = PIXI.Texture.fromImage("resources/bg-stars2.png");
+    stars = new PIXI.extras.TilingSprite(starTexture, u*w, u*h);
+    stars.alpha = 0.5;
+    stars.position.x = 0;
+    stars.position.y = 0;
+    app.stage.addChild(stars);
+
+    var cloudTexture = PIXI.Texture.fromImage("resources/clouds-1.png");
+    cloudA = new PIXI.extras.TilingSprite(cloudTexture, u*w*2, u*6);
+    cloudA.position.x = 0;
+    cloudA.position.y = u*14;
+    cloudA.scale.x = 0.5;
+    cloudA.scale.y = 0.5;
+    cloudA.alpha = 0.4;
+    app.stage.addChild(cloudA);
+
+    var mountBTex = PIXI.Texture.fromImage("resources/vfar-mount.png");
+    mntb = new PIXI.extras.TilingSprite(mountBTex, u*w, u*16);
+    mntb.position.x = 0;
+    mntb.position.y = u*15;
+    app.stage.addChild(mntb);
+
+    var mountATex = PIXI.Texture.fromImage("resources/far-mount.png");
+    mnta = new PIXI.extras.TilingSprite(mountATex, u*w, u*22);
+    mnta.position.x = 0;
+    mnta.position.y = u*11;
+    app.stage.addChild(mnta);
+
+    var cloudTexture = PIXI.Texture.fromImage("resources/clouds-1.png");
+    cloudB = new PIXI.extras.TilingSprite(cloudTexture, u*w*1.5, u*6);
+    cloudB.position.x = 0;
+    cloudB.position.y = u*16;
+    cloudB.scale.x = 0.7;
+    cloudB.scale.y = 0.7;
+    cloudB.alpha = 0.6;
+    app.stage.addChild(cloudB);
+
+    var mountCTex = PIXI.Texture.fromImage("resources/fg-mnt.png");
+    mntc = new PIXI.extras.TilingSprite(mountCTex, u*w, u*4);
+    mntc.position.x = 0;
+    mntc.position.y = u*27.5;
+    app.stage.addChild(mntc);
+
+
+    /*var treeTexture = PIXI.Texture.fromImage("resources/tree-4.png");
+    tree = new PIXI.extras.TilingSprite(treeTexture, u*16, u*24);
+    tree.scale.x = 1.3;
+    tree.scale.y = 1.3;
+    tree.position.x = u*12;
+    tree.position.y = u*6;
+    app.stage.addChild(tree);
+    var leavesTexture = PIXI.Texture.fromImage("resources/leaves.png");
+    var leaves = new Array();
+    for(i = 0; i < 100; i++) {
+      l = new PIXI.extras.TilingSprite(leavesTexture, u*2, u*2);
+      l.tilePosition.x = u * Math.floor(Math.random() * 3);
+      l.tilePosition.y = u * Math.floor(Math.random() * 3);
+      l.scale.x = 1.5;
+      l.scale.y = 1.5;
+      l.position.x = u* (16 + Math.floor(Math.random() * 15));
+      l.position.y = u* (10 + Math.floor(Math.random() * 10));
+      l.rotation = Math.floor(Math.random() * 360);
+      app.stage.addChild(l);
+    }*/
+
+
+  //let growth = {x:0, y: 0, frm: 0, itr: 0, last: null, cont: new PIXI.Container()};
+  //app.stage.addChild(growth.cont);
+
+  function chance(ch) {
+    return (ch >= Math.floor(Math.random() * 100) + 1);
+  }
+
+  animate();
+
+  function parallaxScrolling() {
+    far.tilePosition.y += 0.4;
+    mnta.tilePosition.x -= 0.4;
+    stars.tilePosition.y += 0.4;
+    stars.tilePosition.x += 0.2;
+    mntb.tilePosition.x -= 0.12;
+    mntc.tilePosition.x -= 0.9;
+    cloudA.tilePosition.x += 0.6;
+    cloudB.tilePosition.x += 1.0;
+  }
+
+  /*function addEvent(id, style) {
+    removeEvent(id);
+    animEvents.push({'id': id, 'style': style, 'itr': 0, 'obj': null});
+  }
+  function removeEvent(id) {
+    console.log(id);
+    for(i = animEvents.length -1; i >= 0; i--) {
+      if(animEvents[i].id == id) {
+        return animEvents.splice(i, 1);
+      }
+    }
+    return false;
+  }*/
+
+  let treeList = new Array(0, 0, 0, 0);
+
+  function pickATreeSpot(label) {
+    // Check if not full
+    var free = 0;
+    for(var i = 0; i < treeList.length; i++) {
+      if(treeList[i] == 0)
+        free++;
+    }
+    if(free == 0)
+      return null;
+
+    // Not great :D
+    while(true) {
+      locX = Math.floor(Math.random() * 4);
+      if(treeList[locX] == 0) {
+        treeList[locX] = label;
+        return locX;
+      }
+    }
+  }
+
+  function freeTreeSpot(label) {
+    for(var i = 0; i < treeList.length; i++) {
+      if(treeList[i] == label)
+        treeList[i] = 0;
+    }
+  }
+
+  function createAnimationEvent(id, typ, note = "") {
+    let callSign = typ + id;
+
+    switch(typ) {
+      case "zoom":
+        z = getAnimationEvent(id);
+        if(z) {
+          // Already zooming
+          if(z.isZoomReady())
+            z.start(0, 0);
+        }
+        else {
+          z = new AnimZoom(id);
+          z.start(0, 0);
+          animList.push(z);
+        }
+        break;
+      case "zoomOut":
+        z = getAnimationEvent(id);
+        if(z) {
+          z.startRegress();
+        }
+        break;
+
+      case "tree":
+        locX = pickATreeSpot(callSign);
+        if(locX != null) {
+          //callSign = typ + locX;
+          // Needs to be smarter, pick a free spot
+
+          a = getAnimationEvent(callSign);
+
+          if(a) {
+            // Already exists
+            return null;
+          }
+          else {
+            // ...
+            t = new AnimTree(callSign);
+            t.setLabel(note);
+            t.start(locX * 8, 12);
+            animList.push(t);
+          }
+        }
+        break;
+
+      }
+    return callSign;
+
+  }
+
+  function stopAnimationEvent(callSign) {
+    //console.log("stop " + callSign);
+    a = getAnimationEvent(callSign);
+    if(a) {
+      a.startRegress();
+      freeTreeSpot(callSign);
+    }
+  }
+
+  function getAnimationEvent(id) {
+    for(i = 0; i < animList.length; i++) {
+      if(animList[i].id == id)
+        return animList[i];
+    }
+    return null;
+  }
+
+  function animate() {
+    if(anim) requestAnimationFrame(animate);
+
+    parallaxScrolling();
+
+    for(i = 0; i < animList.length; i++) {
+      a = animList[i];
+
+      if(a && a.active)
+        a.frame();
+
+      if(a && !a.active) {
+        let oList = a.getStageObjects();
+        for(j = 0; j < oList.length; j++) {
+          app.stage.removeChild(oList[j]);
+        }
+        animList[i] = null;
+      }
+    }
+
+    animList = animList.filter(function (el) {return el != null;});
+
+    // aEvent = {'id': 'note:G2', 'style': 'treeGrow', 'itr': 0, 'obj': null}
+
+    /*aExpire = new Array();
+    for(i = 0; i < animEvents.length; i++) {
+      ae = animEvents[i];
+      if(ae.style == "growTree") {
+        if(ae.itr % 10 == 0) {
+        }
+      }
+      if(ae.style == "zoom") {
+        app.stage.scale.x += 0.003;
+        app.stage.scale.y += 0.003;
+        app.stage.x -= 0.5;
+        app.stage.y -= 1;
+        if(ae.itr > 100) {
+          aExpire.push(ae.id);
+        }
+      }
+      if(ae.style == "zoomReset") {
+        app.stage.scale.x = 1;
+        app.stage.scale.y = 1;
+        app.stage.x = 0;
+        app.stage.y = 0;
+        aExpire.push(ae.id);
+      }
+      ae.itr++;
+    }
+    while(aExpire.length > 0) {
+      removeEvent(aExpire.pop());
+    }*/
+
+    //renderer.render(app.stage);
+
+     // later, in the pan function
+      //app.stage.x = -100
+      //app.stage.y = -100
+
+      // later in the zoom function
+      //app.stage.scale.x += 0.003;
+      //app.stage.scale.y += 0.003;
+      //app.stage.x -= 0.5;
+      //app.stage.y -= 1;
+  }
+
+  /*function rotate(obj, rot) {
+      obj.position.rotation = rot - (Math.PI / 2);
+      obj.position.x = obj.position.x - Math.cos(rot);
+      obj.position.y = obj.position.y - Math.sin(rot);
+  }*/
+
+
+  </script>
+</body>
+</html>
