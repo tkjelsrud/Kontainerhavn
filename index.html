@@ -1,30 +1,66 @@
 <html>
 <head>
   <style>
-  body {
-    background-color: black;
+    body {
+      background-color: black;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
     }
   </style>
 
   <script src="https://unpkg.com/zdog@1/dist/zdog.dist.min.js"></script>
-  <!--script src="lib/world.js"></script-->
+  <script src="lib/lfo.js"></script>
 </head>
 
 <body>
-  <canvas class="zdog-canvas" width="1300" height="800"></canvas>
+  <canvas class="zdog-bg" width="1300" height="800"></canvas>
+  <canvas class="zdog-fg" width="1300" height="800"></canvas>
 
 <script type="text/javascript">
 // Made with Zdog
 
+var palette = {
+  sky: ["#659DD6"],
+  sea: ["#003032", "#033D3F", "#0F5859", "#377B7F", "#4B92B9"],
+  cont: [
+  {li: '#C43407', me: '#C43499', da: '#731517'},
+  {li: '#D97D06', me: '#D97D33', da: '#BF5F17'},
+  {li: "#1D9FF2", me: "#0C54A8", da: "#00396D"},
+  {li: "#477C24", me: "#ECEDB3", da: "#4E8027"},
+  {li: "#5E7EB8", me: "#5278B2", da: "#373485"}]};
+
+var lfos = {
+  sea: new LFOLin(),
+};
+
 let isSpinning = true;
 
-let illo = new Zdog.Illustration({
-  element: '.zdog-canvas',
+let zbg = new Zdog.Illustration({
+  element: '.zdog-bg',
   dragRotate: true,
   // stop spinning when drag starts
   onDragStart: function() {
     isSpinning = false;
   },
+});
+
+let zfg = new Zdog.Illustration({
+  element: '.zdog-fg',
+  dragRotate: true,
+  // stop spinning when drag starts
+  onDragStart: function() {
+    isSpinning = false;
+  },
+});
+
+var grSea = new Zdog.Group({
+  addTo: zbg,
+  rotate: {z: -0.03},
+  translate: {},
 });
 
 /*new Zdog.Box({
@@ -41,25 +77,139 @@ let illo = new Zdog.Illustration({
   bottomFace: '#636',
 });*/
 
+// Water test
 
+
+
+function initSea() {
+  new Zdog.Rect({
+    addTo: grSea,
+    width: 1,
+    height: 3000,
+    stroke: 100,
+    translate: { x: -1060, y: -200, z: -100 },
+    // turn to face left
+    color: palette.sea[3],
+  });
+  new Zdog.Rect({
+    addTo: grSea,
+    width: 1,
+    height: 3000,
+    stroke: 100,
+    translate: { x: -960, y: -200, z: -100 },
+    // turn to face left
+    color: palette.sea[2],
+  });
+  new Zdog.Rect({
+    addTo: grSea,
+    width: 1,
+    height: 3000,
+    stroke: 100,
+    translate: { x: -860, y: -200, z: -100 },
+    // turn to face left
+    color: palette.sea[1],
+  });
+  new Zdog.Rect({
+    addTo: grSea,
+    width: 1,
+    height: 3000,
+    stroke: 100,
+    translate: { x: -760, y: -200, z: -120 },
+    // turn to face left
+    color: palette.sea[2],
+  });
+
+}
+
+
+// Ground
+new Zdog.Box({
+  addTo: zbg,
+  width: 2100,
+  height: 3000,
+  depth: 10,
+  stroke: 10,
+  translate: { x: 400, y: 0, z: -100 },
+  // turn to face left
+  color: '#999',
+});
+
+// Sky
+new Zdog.Rect({
+  addTo: zbg,
+  width: 1,
+  height: 3000,
+  stroke: 500,
+  translate: { x: -1960, y: -200, z: -100 },
+  // turn to face left
+  color: palette.sky[0],
+});
+new Zdog.Rect({
+  addTo: zbg,
+  width: 1,
+  height: 3000,
+  stroke: 200,
+  translate: { x: -1660, y: -200, z: -100 },
+  // turn to face left
+  color: palette.sea[4],
+});
+
+
+function getRandomContainerColor() {
+  return palette.cont[Math.floor(Math.random() * palette.cont.length)];
+}
+
+function getRandomSeaColor() {
+  return palette.sea[Math.floor(Math.random() * palette.sea.length)];
+}
+
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
 function test(mx, my, mz) {
+  /*var fgGroup = new Zdog.Group({
+    addTo: illo,
+    translate: {},
+  });*/
+
+  /*new Zdog.Box({
+    addTo: illo,
+    width: 5000,
+    height: 6000,
+    depth: 60,
+    stroke: false,
+    translate: { x: 0, y: 0, z:-140 },
+    color: '#C25', // default face color
+    leftFace: '#EA0',
+    rightFace: '#E62',
+    topFace: '#ED0',
+    bottomFace: '#636',
+  });*/
+
   for(let z = 0; z < mz; z++) {
     for(let x = 0; x < mx; x++) {
       for(let y = 0; y < my; y++) {
-        if(Math.floor(Math.random() * 10) > 3) {
+        if(Math.floor(Math.random() * 10) > 3+mz-x) {
+          let cx = getRandomContainerColor();
+
           new Zdog.Box({
-            addTo: illo,
-            width: 90,
+            addTo: zfg,
+            width: 160,
             height: 60,
             depth: 60,
             stroke: false,
-            translate: { x: (x-5)*100, y: (y-10)*100, z:z*(-60) },
-            color: '#C25', // default face color
-            leftFace: '#EA0',
-            rightFace: '#E62',
-            topFace: '#ED0',
-            bottomFace: '#636',
+            translate: { x: (x-2)*200, y: (y-10)*100, z:z*(-60) },
+            color: cx.me, // '#C25', // default face color
+            leftFace: cx.me, //'#EA0',
+            rightFace: cx.da, // '#E62',
+            topFace: cx.li, // '#ED0',
+            bottomFace: cx.da, //'#636',
           });
         }
       }
@@ -67,21 +217,57 @@ function test(mx, my, mz) {
   }
 
 }
+initSea();
 
 // Set some values for now
-illo.rotate.x = 1.1;
-illo.rotate.z = 88;
-illo.zoom = 0.8;
+zfg.rotate.x = 1.36;
+zfg.rotate.y = 0.005;
+zfg.rotate.z = 89.7;
+zfg.zoom = 1.1;
+
+zbg.rotate.x = 1.36;
+zbg.rotate.y = 0.005;
+zbg.rotate.z = 89.7;
+zbg.zoom = 1.1;
+
+zspin = 0.0005;
 
 function animate() {
-  illo.rotate.z += isSpinning ? 0.002 : 0;
-  illo.updateRenderGraph();
+  for (let l in lfos){ // Calculate new LFO values
+    lfos[l].animate();
+  }
+
+  zfg.rotate.z += isSpinning ? zspin : 0;
+  if(zfg.rotate.z > 89.8 || zfg.rotate.z < 89.6)
+    zspin = zspin * -1;
+
+  zbg.rotate.z += isSpinning ? zspin : 0;
+
+  animateSea();
+  randomContainerSkew();
+
+  zfg.updateRenderGraph();
+  zbg.updateRenderGraph();
   requestAnimationFrame( animate );
 }
 
-animate();
+function randomContainerSkew() {
+  let c = zfg.children[Math.floor(Math.random() * zfg.children.length)];
+  c.rotate.y += 0.02;
+}
+
+function animateSea() {
+  // Wobble each layer of sea (less by distance)
+  for(let i = 0; i < grSea.children.length; i++) {
+    let l = grSea.children[i];
+    //l.rotate.z += zspin * -2 * ((i % 2) + 1);
+
+    l.rotate.z += (i % 2 == 0 ? lfos.sea.value() : lfos.sea.iValue());
+  }
+}
 
 test(10, 20, 2);
+animate();
 
 </script>
 </body>
